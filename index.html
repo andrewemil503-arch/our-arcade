@@ -51,6 +51,7 @@ button:disabled{opacity:.5}
 .oc-letter{font-family:"Playfair Display",Georgia,serif;font-size:84px;text-align:center;color:var(--pri);text-shadow:0 0 22px var(--glow);line-height:1.1;margin:6px 0}
 .ocf{margin:8px 0}.ocf .l{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin:0 4px 3px}
 .oct{width:100%;border-collapse:collapse;font-size:14px}.oct td,.oct th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:center}.oct td:first-child{text-align:left;color:var(--mute)}
+.oct select.adj{width:auto;padding:2px 4px;font-size:13px;font-weight:700;border-radius:8px;border:1px solid var(--line);background:var(--cell);color:var(--ink);margin:0}
 .pts{color:var(--pri);font-weight:700}.bad{text-decoration:line-through;opacity:.6}
 .oc-scores{display:flex;justify-content:space-around;font-size:24px;text-align:center;margin:10px 0}
 .wc{display:flex;gap:10px;align-items:baseline;padding:7px 12px;border-radius:14px;font-size:18px;margin:4px 0;background:var(--cell);text-transform:capitalize}
@@ -208,7 +209,7 @@ main{width:100%;max-width:480px;margin:0 auto;padding-left:16px;padding-right:16
 <script>
 /* ===== GAME REGISTRY — add new games here ===== */
 const LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-const OC={key:null,draft:{},written:false,timer:null};
+const OC={key:null,draft:{},written:false,timer:null,ans:null,played:null};
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const CATS=[["boy","Boy","ولد"],["girl","Girl","بنت"],["plant","Plant","نبات"],["animal","Animal","حيوان"],["thing","Thing","جماد"],["country","Country","بلاد"]];
 const norm=s=>(s||"").trim().toLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/\s+/g," ");
@@ -223,7 +224,7 @@ const GAMES={
     init(o){o=o||{};const rounds=o.rounds||3,lang=o.lang||"en";
       const pool=(lang==="ar"?"ابتجحخدرزسشصطعغفقكلمنهوي":"ABCDEFGHIJKLMNOPRSTW").split("");
       for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
-      return{opts:{rounds,lang},sid:Math.random().toString(36).slice(2,8),letters:pool.slice(0,rounds),round:0,phase:"play",by:null,scores:[0,0],win:null};
+      return{opts:{rounds,lang},sid:Math.random().toString(36).slice(2,8),letters:pool.slice(0,rounds),round:0,phase:"play",by:null,scores:[0,0],win:null,adj:null};
     },
     render(stage,s,ctx){
       clearInterval(OC.timer);
@@ -255,21 +256,36 @@ const GAMES={
       }
       // scoring phase
       stage.dataset.k="";
-      stage.innerHTML=head+'<p class="status"> '+esc(N[s.by]||"Someone")+' called Otobis Complete!<br>Counting points…</p>';
+      const isHost=ctx.myIdx===0;
       const mk=i=>ctx.db.doc("rooms/"+ctx.code+"/ans/"+s.sid+"_"+s.round+"_"+i);
       if(!OC.written){OC.written=true;mk(ctx.myIdx).set({a:{...OC.draft}}).catch(()=>{OC.written=false})}
-      const results=(a0,a1)=>{SFX.play("reveal");
-        const rows=ocScore(a0,a1,L),r0=rows.reduce((t,r)=>t+r.p0,0),r1=rows.reduce((t,r)=>t+r.p1,0);
-        const cell=(v,x,p)=>'<td><span class="'+(x&&!v?"bad":"")+'">'+(x?esc(x):"—")+'</span> <span class="pts">+'+p+'</span></td>';
+      const adj=s.adj||{};
+      const results=(a0,a1)=>{
+        if(OC.played!==key){OC.played=key;SFX.play("reveal")}
+        const rows=ocScore(a0,a1,L);
+        // final points per cell: the creator's override if there is one, otherwise the automatic score
+        const pt=(i,pl)=>{const o=adj[i+"_"+pl];return(o===0||o===5||o===10)?o:rows[i]["p"+pl]};
+        const r0=rows.reduce((t,r,i)=>t+pt(i,0),0),r1=rows.reduce((t,r,i)=>t+pt(i,1),0);
+        const cell=(r,i,pl)=>{const x=pl?r.y:r.x,v=pl?r.v1:r.v0,p=pt(i,pl);
+          const pts=isHost&&x?'<select class="adj" data-k="'+i+'_'+pl+'" aria-label="Points">'+[10,5,0].map(n=>'<option value="'+n+'"'+(n===p?" selected":"")+'>+'+n+'</option>').join("")+'</select>':'<span class="pts">+'+p+'</span>';
+          return '<td><span class="'+(x&&!v?"bad":"")+'">'+(x?esc(x):"—")+'</span> '+pts+'</td>'};
         stage.innerHTML=head+'<div class="oc-letter" style="font-size:48px">'+esc(L)+'</div><table class="oct"><tr><th></th><th>'+esc(N[0])+'</th><th>'+esc(N[1])+'</th></tr>'+
-          rows.map((r,i)=>'<tr><td>'+CATS[i][1]+'</td>'+cell(r.v0,r.x,r.p0)+cell(r.v1,r.y,r.p1)+'</tr>').join("")+
-          '<tr><td><b>Round</b></td><td class="pts">'+r0+'</td><td class="pts">'+r1+'</td></tr></table><p class="sub" style="font-size:12px;margin:8px 0 0">Same answer = 5 · different = 10 · only you = 10 · must start with the letter</p>';
+          rows.map((r,i)=>'<tr><td>'+CATS[i][1]+'</td>'+cell(r,i,0)+cell(r,i,1)+'</tr>').join("")+
+          '<tr><td><b>Round</b></td><td class="pts">'+r0+'</td><td class="pts">'+r1+'</td></tr></table><p class="sub" style="font-size:12px;margin:8px 0 0">'+
+          (isHost?'You\'re the game creator: set each answer to 10, 5 or 0 points.':esc(N[0])+' (game creator) can adjust the points.')+' Default: same answer = 5 · different = 10 · only you = 10 · must start with the letter</p>';
+        stage.querySelectorAll("select.adj").forEach(sel=>{sel.onchange=()=>{ctx.move({...s,adj:{...adj,[sel.dataset.k]:parseInt(sel.value,10)}})}});
         const last=s.round+1>=s.opts.rounds;
-        const nb=document.createElement("button");nb.style.cssText="width:100%;margin-top:14px";nb.textContent=last?"See final result ":"Next round →";
-        nb.onclick=()=>{const t=[s.scores[0]+r0,s.scores[1]+r1];ctx.move(last?{...s,scores:t,phase:"done",win:t[0]===t[1]?"draw":t[0]>t[1]?0:1}:{...s,scores:t,round:s.round+1,phase:"play",by:null})};
-        stage.appendChild(nb);
+        if(isHost){
+          const nb=document.createElement("button");nb.style.cssText="width:100%;margin-top:14px";nb.textContent=last?"See final result ":"Next round →";
+          nb.onclick=()=>{const t=[s.scores[0]+r0,s.scores[1]+r1];ctx.move(last?{...s,scores:t,phase:"done",win:t[0]===t[1]?"draw":t[0]>t[1]?0:1,adj:null}:{...s,scores:t,round:s.round+1,phase:"play",by:null,adj:null})};
+          stage.appendChild(nb);
+        }else{
+          const w=document.createElement("p");w.className="status";w.style.marginTop="14px";w.textContent="Waiting for "+(N[0]||"the game creator")+" to continue…";stage.appendChild(w);
+        }
       };
-      const poll=async()=>{try{const[x,y]=await Promise.all([mk(0).get(),mk(1).get()]);if(x.exists&&y.exists){clearInterval(OC.timer);results(x.data().a,y.data().a)}}catch(e){}};
+      if(OC.ans&&OC.ans.key===key){results(OC.ans.a0,OC.ans.a1);return}
+      stage.innerHTML=head+'<p class="status"> '+esc(N[s.by]||"Someone")+' called Otobis Complete!<br>Counting points…</p>';
+      const poll=async()=>{try{const[x,y]=await Promise.all([mk(0).get(),mk(1).get()]);if(x.exists&&y.exists){clearInterval(OC.timer);OC.ans={key,a0:x.data().a,a1:y.data().a};results(OC.ans.a0,OC.ans.a1)}}catch(e){}};
       poll();OC.timer=setInterval(poll,900);
     },
     status(s,ctx){
@@ -280,7 +296,7 @@ const GAMES={
   },
   ul:{
     name:"Upper / Lower",emoji:"1↕9",desc:"Guess each other's secret number (1–99)",
-    init(){return{sid:Math.random().toString(36).slice(2,8),phase:"pick",turn:1,hist:[],win:null}},
+    init(){return{sid:Math.random().toString(36).slice(2,8),phase:"pick",turn:Math.random()<.5?0:1,hist:[],win:null}},
     render(stage,s,ctx){
       if(s.phase==="pick"&&stage.dataset.k===s.sid+"pick")return;
       clearInterval(UL.timer);
@@ -333,7 +349,7 @@ const GAMES={
   },
   wc:{
     name:"Word Chain",emoji:"a→b",desc:"Crack your partner's secret chain of linked words",
-    init(o){return{opts:{words:Math.min(9,Math.max(5,(o&&o.words)||9))},sid:Math.random().toString(36).slice(2,8),phase:"pick",turn:1,prog:[{c:1,k:1},{c:1,k:1}],last:null,win:null}},
+    init(o){return{opts:{words:Math.min(9,Math.max(5,(o&&o.words)||9))},sid:Math.random().toString(36).slice(2,8),phase:"pick",turn:Math.random()<.5?0:1,prog:[{c:1,k:1},{c:1,k:1}],last:null,win:null}},
     render(stage,s,ctx){
       if(s.phase==="pick"&&stage.dataset.k===s.sid+"wpick")return;
       clearInterval(WC.timer);
@@ -396,7 +412,7 @@ const GAMES={
   },
   ttt:{
     name:"Tic-Tac-Toe",emoji:"#",desc:"The classic. Three in a row wins",
-    init:()=>({b:Array(9).fill(""),turn:0,win:null,line:null}),
+    init:()=>({b:Array(9).fill(""),turn:Math.random()<.5?0:1,win:null,line:null}),
     // render(stage, state, ctx) ; ctx={myIdx, names, move(newState)}
     render(stage,s,ctx){
       stage.innerHTML="";
