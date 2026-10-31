@@ -152,6 +152,56 @@ main{width:100%;max-width:480px;margin:0 auto;padding-left:16px;padding-right:16
 @keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
 .pill{font-weight:700}
 </style>
+<style>
+.rps{text-align:center;padding:2px 0 4px}
+.rps-h b{display:block;font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:600;font-size:25px;color:var(--pri);text-shadow:0 0 18px var(--glow)}
+.rps-h small{display:block;color:var(--mute);font-size:13px;margin-top:2px}
+.rps-vs{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;margin:18px 0 16px;padding:20px 8px 14px;border-radius:24px;background:var(--pri2);overflow:hidden}
+.rps-mid{font-size:11px;font-weight:800;letter-spacing:.2em;color:var(--mute)}
+.rps-side{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.rps-side b{font-size:14px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rps-hand{position:relative;width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:var(--card);box-shadow:inset 0 0 0 1px var(--line),0 10px 26px -12px var(--glow);color:var(--x);transition:box-shadow .3s,opacity .3s}
+.rps-side.opp .rps-hand{color:var(--o)}
+.rps-hand svg{width:54px;height:54px;overflow:visible}
+.rps-hand .q{font:italic 600 36px "Playfair Display",Georgia,serif;opacity:.5}
+.rps-chip{font-size:12px;font-weight:700;padding:3px 11px;border-radius:99px;background:var(--card);color:var(--mute);transition:.3s}
+.rps-side.lk .rps-chip{color:var(--pri)}
+.rps-side.th .rps-hand{animation:rpsBreath 1.8s ease-in-out infinite}
+.rps-side.sh .rps-hand{animation:rpsBob .55s ease-in-out 3 both}
+.rps-side.win .rps-hand{transform:scale(1.1);box-shadow:0 0 0 3px var(--pri),0 16px 36px -10px var(--glow);animation:rpsPopW .65s cubic-bezier(.2,1.5,.4,1) both,rpsGlow 1.8s ease-in-out .7s infinite}
+.rps-side.lose .rps-hand{transform:scale(.9);opacity:.5;filter:saturate(.4);animation:rpsPopL .65s ease both}
+.rps-side.tie .rps-hand{animation:rpsPop .6s cubic-bezier(.2,1.5,.4,1) both}
+.rps-side.win .rps-chip{background:var(--pri);color:#fff}
+.rps-sp{position:absolute;left:50%;top:46px;width:7px;height:7px;margin:-3px;border-radius:50%;background:var(--pri);opacity:0;animation:rpsSp .9s ease-out .1s both}
+.rps-sp:nth-of-type(even){background:#f5c26b}
+.rps-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,var(--glow),transparent 65%);opacity:0;pointer-events:none;animation:rpsFlash .75s ease-out both}
+.rps-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rps-c{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px 10px;background:var(--cell);color:var(--ink);border:2px solid transparent;border-radius:18px;transition:transform .2s,border-color .2s,box-shadow .2s,background .2s}
+.rps-c svg{width:40px;height:40px;color:var(--x);overflow:visible}
+.rps-c span{font-size:13px;font-weight:700}
+.rps-c:hover:not(:disabled){transform:translateY(-3px)}
+.rps-c.sel{border-color:var(--pri);background:var(--card);box-shadow:0 10px 24px -10px var(--glow);transform:translateY(-4px)}
+.rps-c.sel svg{animation:rpsWiggle .5s}
+.rps-c:disabled{opacity:.45}.rps-c.sel:disabled{opacity:1}
+.rps-lock{width:100%;margin-top:14px}
+.rps-hint{margin:14px 0 0;color:var(--mute);font-size:14px;font-weight:600}
+.rps-cap{min-height:34px;margin-top:2px;font-size:21px;font-weight:800}
+.rps-word span{display:inline-block;margin:0 6px;animation:rpsWord .45s both}
+.rps-word span:nth-child(2){animation-delay:.5s}.rps-word span:nth-child(3){animation-delay:1s}
+.rps-res{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:600;font-size:26px;color:var(--pri);animation:up .5s .15s both}
+.rps-sub{color:var(--mute);font-size:14px;margin:2px 0 0;animation:up .5s .3s both}
+.rps-again{margin-top:14px;width:100%}
+@keyframes rpsBreath{50%{transform:scale(1.06)}}
+@keyframes rpsBob{0%,100%{transform:translateY(0) rotate(calc(var(--d) * -6deg))}30%{transform:translateY(-24px) rotate(calc(var(--d) * 14deg))}60%{transform:translateY(8px) rotate(calc(var(--d) * -4deg))}}
+@keyframes rpsPop{0%{transform:scale(.2) rotate(-25deg);opacity:0}60%{transform:scale(1.18) rotate(6deg);opacity:1}100%{transform:none}}
+@keyframes rpsPopW{0%{transform:scale(.2) rotate(-25deg);opacity:0}60%{transform:scale(1.28) rotate(6deg);opacity:1}100%{transform:scale(1.1)}}
+@keyframes rpsPopL{0%{transform:scale(.2) rotate(25deg);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(.9);opacity:.5}}
+@keyframes rpsGlow{50%{box-shadow:0 0 0 7px transparent,0 16px 40px -8px var(--glow)}}
+@keyframes rpsSp{0%{transform:rotate(var(--a)) translateY(-30px) scale(1);opacity:1}100%{transform:rotate(var(--a)) translateY(-78px) scale(.2);opacity:0}}
+@keyframes rpsFlash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+@keyframes rpsWord{from{opacity:.15;transform:translateY(8px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes rpsWiggle{25%{transform:rotate(-12deg) scale(1.1)}60%{transform:rotate(9deg) scale(1.1)}}
+</style>
 </head>
 <body>
 <div class="sky" id="sky"></div>
@@ -295,8 +345,8 @@ const GAMES={
     }
   },
   ul:{
-    name:"Upper / Lower",emoji:"1↕9",desc:"Guess each other's secret number (1–99)",
-    init(){return{sid:Math.random().toString(36).slice(2,8),phase:"pick",turn:Math.random()<.5?0:1,hist:[],win:null}},
+    name:"Upper / Lower",turnBased:true,emoji:"1↕9",desc:"Guess each other's secret number (1–99)",
+    init(){return{sid:Math.random().toString(36).slice(2,8),phase:"pick",turn:0,hist:[],win:null}},
     render(stage,s,ctx){
       if(s.phase==="pick"&&stage.dataset.k===s.sid+"pick")return;
       clearInterval(UL.timer);
@@ -348,8 +398,8 @@ const GAMES={
     }
   },
   wc:{
-    name:"Word Chain",emoji:"a→b",desc:"Crack your partner's secret chain of linked words",
-    init(o){return{opts:{words:Math.min(9,Math.max(5,(o&&o.words)||9))},sid:Math.random().toString(36).slice(2,8),phase:"pick",turn:Math.random()<.5?0:1,prog:[{c:1,k:1},{c:1,k:1}],last:null,win:null}},
+    name:"Word Chain",turnBased:true,emoji:"a→b",desc:"Crack your partner's secret chain of linked words",
+    init(o){return{opts:{words:Math.min(9,Math.max(5,(o&&o.words)||9))},sid:Math.random().toString(36).slice(2,8),phase:"pick",turn:0,prog:[{c:1,k:1},{c:1,k:1}],last:null,win:null}},
     render(stage,s,ctx){
       if(s.phase==="pick"&&stage.dataset.k===s.sid+"wpick")return;
       clearInterval(WC.timer);
@@ -411,8 +461,8 @@ const GAMES={
     }
   },
   ttt:{
-    name:"Tic-Tac-Toe",emoji:"#",desc:"The classic. Three in a row wins",
-    init:()=>({b:Array(9).fill(""),turn:Math.random()<.5?0:1,win:null,line:null}),
+    name:"Tic-Tac-Toe",turnBased:true,emoji:"#",desc:"The classic. Three in a row wins",
+    init:()=>({b:Array(9).fill(""),turn:0,win:null,line:null}),
     // render(stage, state, ctx) ; ctx={myIdx, names, move(newState)}
     render(stage,s,ctx){
       stage.innerHTML="";
@@ -482,7 +532,7 @@ $("go").onclick=async()=>{
     const ref=db.doc("rooms/"+code);const snap=await ref.get();
     if(!snap.exists){
       if(mode==="join"){$("err").textContent="Room not found. Check the code and try again.";$("go").disabled=false;return}
-      await ref.set({game:selGame,players:[{id:uid,name}],state:GAMES[selGame].init(opts)});
+      await ref.set({game:selGame,players:[{id:uid,name}],state:GAMES[selGame].init(opts),...(GAMES[selGame].turnBased?{rps:RPS0()}:{})});
     }else{
       const d=snap.data();
       const i=d.players.findIndex(p=>p.id===uid);
@@ -496,27 +546,169 @@ $("go").onclick=async()=>{
   $("go").disabled=false;
 };
 
+/* ===== Rock Paper Scissors — decides who starts (turn-based games) ===== */
+const RPS0=()=>({sid:1,picks:{0:"",1:""},reveal:null,first:null,round:0});
+const RPS_L={r:"Rock",p:"Paper",s:"Scissors"};
+const RPS_BEAT={r:"s",s:"p",p:"r"};
+const rpsWinner=(a,b)=>a===b?"tie":RPS_BEAT[a]===b?0:1;
+const SV='<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">';
+const RPS_ICON={
+  r:SV+'<path d="M12 38l5-17 14-9 17 4 8 15-4 18-16 6-18-4z" fill="currentColor" fill-opacity=".14"/><path d="M31 33L17 21M31 33l17-17M31 33l25-2M31 33l-19 5M31 33l1 21"/></svg>',
+  p:SV+'<path d="M17 8h21l11 11v37H17z" fill="currentColor" fill-opacity=".14"/><path d="M38 8v11h11M24 30h18M24 38h18M24 46h11"/></svg>',
+  s:SV+'<circle cx="22" cy="49" r="7" fill="currentColor" fill-opacity=".14"/><circle cx="42" cy="49" r="7" fill="currentColor" fill-opacity=".14"/><path d="M26 43L44 9M38 43L20 9"/><circle cx="32" cy="31" r="1.8" fill="currentColor"/></svg>',
+  lock:SV+'<rect x="15" y="28" width="34" height="25" rx="7" fill="currentColor" fill-opacity=".14"/><path d="M22 28v-6a10 10 0 0 1 20 0v6"/></svg>'
+};
+let RP={sel:"",selSid:null,phase:null,fin:false,handled:null,sawOpen:null,timers:[]};
+let lastD=null;
+function rpsClear(){RP.timers.forEach(clearTimeout);RP={sel:"",selSid:null,phase:null,fin:false,handled:null,sawOpen:null,timers:[]}}
+
+async function rpsPick(ref,idx,ch){
+  await db.runTransaction(async tx=>{
+    const s=await tx.get(ref),d=s.data(),r=d.rps||RPS0();
+    if(r.reveal||r.first!=null)return;
+    const picks={0:(r.picks||{})[0]||"",1:(r.picks||{})[1]||""};
+    if(picks[idx])return;
+    picks[idx]=ch;
+    const upd={["rps.picks."+idx]:ch};
+    if(picks[0]&&picks[1]){
+      const w=rpsWinner(picks[0],picks[1]);
+      upd["rps.reveal"]={picks:[picks[0],picks[1]],w,by:idx,n:r.sid||1};
+      if(w!=="tie"){upd["rps.first"]=w;upd["state.turn"]=w}
+    }
+    tx.update(ref,upd);
+  });
+}
+async function rpsNext(n){
+  if(!cur)return;const ref=cur.ref;
+  try{await db.runTransaction(async tx=>{
+    const d=(await tx.get(ref)).data(),r=d.rps;
+    if(!r||(r.sid||1)!==n||r.first!=null)return;
+    tx.update(ref,{rps:{sid:n+1,picks:{0:"",1:""},reveal:null,first:null,round:r.round||0}});
+  })}catch(e){}
+}
+function rpsSync(r,me){
+  const rv=r.reveal,sid=r.sid||1;
+  if(!rv){RP.sawOpen=sid;RP.phase=null;RP.fin=false;return}
+  if(RP.handled===rv.n)return;
+  RP.handled=rv.n;
+  if(RP.sawOpen===rv.n){
+    RP.phase="shake";
+    const later=(ms,fn)=>RP.timers.push(setTimeout(()=>{fn();if(lastD&&cur)paint(lastD,cur.ref)},ms));
+    later(1650,()=>{RP.phase="show";SFX.play(rv.w==="tie"?"reveal":rv.w===me?"win":"lose");if(rv.w===me)burst()});
+    if(rv.w==="tie"){RP.timers.push(setTimeout(()=>{if(rv.by===me)rpsNext(rv.n)},4200))}
+    else later(4400,()=>{RP.fin=true});
+  }else{RP.phase="show";if(rv.w!=="tie")RP.fin=true}
+}
+function rpsStatus(r,me,N){
+  const rv=r.reveal;
+  if(rv){
+    if(RP.phase==="shake")return "Rock… Paper… Scissors…";
+    if(rv.w==="tie")return "It's a tie — go again!";
+    return rv.w===me?"You win! You start this round":N[rv.w]+" wins! "+N[rv.w]+" starts this round";
+  }
+  return (r.picks||{})[me]?"Waiting for "+N[1-me]+"…":"Rock Paper Scissors — the winner starts";
+}
+function renderRps(stage,d,r,me,canPlay){
+  const N=d.players.map(p=>p.name||"Partner"),opp=1-me,rv=r.reveal,picks=r.picks||{},sid=r.sid||1;
+  const ph=rv?(RP.phase||"show"):"pick",mine=picks[me]||"",theirs=picks[opp]||"";
+  const key=["rps",sid,ph,mine,theirs?1:0,rv?String(rv.w):"",canPlay?1:0].join("|");
+  if(stage.dataset.k===key)return;
+  stage.dataset.k=key;
+  if(RP.selSid!==sid){RP.selSid=sid;RP.sel=""}
+  if(mine)RP.sel=mine;
+  const side=i=>{
+    const isMe=i===me;let inner,chip,cls;
+    if(ph==="pick"){
+      const lk=!!picks[i];
+      inner=isMe&&lk?RPS_ICON[picks[i]]:lk?RPS_ICON.lock:'<span class="q">?</span>';
+      chip=lk?"Locked in ✓":"Choosing…";cls=lk?"lk":"th";
+    }else if(ph==="shake"){inner=RPS_ICON.r;chip="Ready…";cls="sh"}
+    else{
+      const ch=rv.picks[i];inner=RPS_ICON[ch];chip=RPS_L[ch];
+      cls=rv.w==="tie"?"tie":rv.w===i?"win":"lose";
+    }
+    let sp="";
+    if(ph==="show"&&rv.w===i)for(let k=0;k<10;k++)sp+='<i class="rps-sp" style="--a:'+(k*36)+'deg"></i>';
+    return '<div class="rps-side '+(isMe?"me":"opp")+' '+cls+'" style="--d:'+(isMe?1:-1)+'"><div class="rps-hand">'+inner+sp+'</div><b>'+esc(isMe?"You":N[i])+'</b><span class="rps-chip">'+chip+'</span></div>';
+  };
+  let h='<div class="rps"><div class="rps-h"><b>Who starts?</b><small>Rock · Paper · Scissors — the winner goes first</small></div>'
+    +'<div class="rps-vs">'+(ph==="show"?'<i class="rps-flash"></i>':'')+side(me)+'<span class="rps-mid">VS</span>'+side(opp)+'</div>';
+  if(ph==="pick"){
+    h+='<div class="rps-pick">'+["r","p","s"].map(c=>'<button class="rps-c'+(RP.sel===c?" sel":"")+'" data-c="'+c+'"'+(!canPlay||mine?" disabled":"")+'>'+RPS_ICON[c]+'<span>'+RPS_L[c]+'</span></button>').join("")+'</div>';
+    if(!canPlay)h+='<p class="rps-hint">Waiting for the players…</p>';
+    else if(mine)h+='<p class="rps-hint">Locked in — waiting for '+esc(N[opp])+'…</p>';
+    else h+='<button class="rps-lock" disabled>Lock in</button>';
+  }else if(ph==="shake"){
+    h+='<div class="rps-cap rps-word"><span>Rock</span><span>Paper</span><span>Scissors</span></div>';
+  }else if(rv.w==="tie"){
+    h+='<div class="rps-res">It\'s a tie!</div><p class="rps-sub">Same choice — one more try</p><button class="ghost rps-again">Go again</button>';
+  }else{
+    const nm=rv.w===me?"You":N[rv.w];
+    h+='<div class="rps-res">'+esc(nm)+(rv.w===me?" win!":" wins!")+'</div><p class="rps-sub">'+esc(nm)+(rv.w===me?" start":" starts")+' this round</p>';
+  }
+  h+='</div>';
+  stage.innerHTML=h;
+  const lock=stage.querySelector(".rps-lock");
+  if(lock&&RP.sel)lock.disabled=false;
+  stage.querySelectorAll(".rps-c").forEach(b=>b.onclick=()=>{
+    if(!canPlay||(picks[me]))return;
+    RP.sel=b.dataset.c;SFX.play("tap");
+    stage.querySelectorAll(".rps-c").forEach(x=>x.classList.toggle("sel",x===b));
+    if(lock)lock.disabled=false;
+  });
+  if(lock)lock.onclick=()=>{
+    if(!RP.sel)return;
+    lock.disabled=true;lock.textContent="Locking in…";SFX.play("pop");
+    rpsPick(cur.ref,me,RP.sel).catch(()=>{lock.disabled=false;lock.textContent="Lock in"});
+  };
+  const again=stage.querySelector(".rps-again");
+  if(again)again.onclick=()=>{again.disabled=true;rpsNext(rv.n)};
+}
+
+function paint(d,ref){
+  const g=GAMES[d.game];if(!g)return;
+  const code=cur?cur.code:"";
+  $("gname").textContent=g.name;
+  const myIdx=d.players.findIndex(p=>p.id===uid);
+  const names=d.players.map(p=>p.name);
+  const ctx={myIdx,names,db,code,move:st=>ref.update({state:st}).catch(()=>{})};
+  const two=d.players.length>=2,tb=!!g.turnBased,me=myIdx<0?0:myIdx;
+  const rps=tb?(d.rps||RPS0()):null;
+  if(tb&&two)rpsSync(rps,me);
+  const arena=tb&&two&&(rps.first==null||(!!rps.reveal&&!RP.fin));
+  const live=!arena&&d.state.turn!==undefined&&d.state.phase!=="pick"&&d.state.phase!=="done"&&d.state.win==null;
+  $("players").innerHTML=d.players.map((p,i)=>'<div class="pl'+(live&&d.state.turn===i?" turn":"")+'"><i style="--h:'+(i?250:340)+'">'+esc((p.name||"?")[0].toUpperCase())+'</i><b>'+esc(p.name)+(i===myIdx?" (you)":"")+'</b></div>').join('<span class="vs">vs</span>')+(d.players.length<2?'<span class="vs">vs</span><div class="pl wait"><i style="--h:250">?</i><b>Waiting…</b></div>':"");
+  if(!arena)fx(d,myIdx);
+  $("status").textContent=!two?"Waiting for your partner to join… share the code "+code:arena?rpsStatus(rps,me,names):g.status(d.state,ctx);
+  $("again").style.display=arena?"none":"";
+  if(!two){$("stage").innerHTML="";$("stage").dataset.k="";return}
+  const stage=$("stage");
+  if(arena){renderRps(stage,d,rps,me,myIdx>=0);return}
+  if((stage.dataset.k||"").indexOf("rps|")===0){stage.dataset.k="";stage.innerHTML=""}
+  g.render(stage,d.state,ctx);
+  if(d.state.win!==null&&d.state.win!=="draw"&&d.state.win===myIdx){if(!celebrated){celebrated=true;burst()}}else if(d.state.win===null)celebrated=false;
+  // Rounds alternate: round 1 = RPS winner starts, round 2 = the other player, round 3 = RPS winner again…
+  $("again").onclick=()=>{
+    const ns=g.init(d.state.opts);
+    if(tb&&rps&&rps.first!=null){
+      const r=(rps.round||0)+1;
+      ns.turn=r%2===0?rps.first:1-rps.first;
+      ref.update({state:ns,"rps.round":r}).catch(()=>{});
+    }else ref.update({state:ns}).catch(()=>{});
+  };
+}
+
 function enter(code,ref){
-  cur={code,ref};prevD=null;show(true);$("rcode").textContent="Room "+code;$("bigcode").textContent=code;
+  cur={code,ref};prevD=null;lastD=null;rpsClear();show(true);$("rcode").textContent="Room "+code;$("bigcode").textContent=code;
+  $("stage").dataset.k="";
   history.replaceState(null,"","#"+code);
   unsub=ref.onSnapshot(snap=>{
-    if(!snap.exists)return;const d=snap.data(),g=GAMES[d.game];if(!g)return;
-    $("gname").textContent=g.name;
-    const myIdx=d.players.findIndex(p=>p.id===uid);
-    const names=d.players.map(p=>p.name);
-    const ctx={myIdx,names,db,code,move:st=>ref.update({state:st}).catch(()=>{})};
-    const live=d.state.turn!==undefined&&d.state.phase!=="pick"&&d.state.phase!=="done"&&d.state.win==null;
-    $("players").innerHTML=d.players.map((p,i)=>'<div class="pl'+(live&&d.state.turn===i?" turn":"")+'"><i style="--h:'+(i?250:340)+'">'+esc((p.name||"?")[0].toUpperCase())+'</i><b>'+esc(p.name)+(i===myIdx?" (you)":"")+'</b></div>').join('<span class="vs">vs</span>')+(d.players.length<2?'<span class="vs">vs</span><div class="pl wait"><i style="--h:250">?</i><b>Waiting…</b></div>':"");
-    fx(d,myIdx);
-    $("status").textContent=d.players.length<2?"Waiting for your partner to join… share the code "+code:g.status(d.state,ctx);
-    if(d.players.length<2){$("stage").innerHTML="";return}
-    g.render($("stage"),d.state,ctx);
-    if(d.state.win!==null&&d.state.win!=="draw"&&d.state.win===myIdx){if(!celebrated){celebrated=true;burst()}}else if(d.state.win===null)celebrated=false;
-    $("again").onclick=()=>ref.update({state:g.init(d.state.opts)});
+    if(!snap.exists)return;
+    lastD=snap.data();paint(lastD,ref);
   },e=>{$("status").textContent="Connection problem: "+(e.message||e.code)});
 }
 
-$("leave").onclick=()=>{if(unsub)unsub();unsub=null;cur=null;history.replaceState(null,"","#");show(false)};
+$("leave").onclick=()=>{if(unsub)unsub();unsub=null;cur=null;lastD=null;rpsClear();history.replaceState(null,"","#");show(false)};
 $("copy").onclick=async()=>{
   const url=location.href.split("#")[0]+"#"+(cur?cur.code:"");
   const done=t=>{$("copy").textContent=t;setTimeout(()=>$("copy").textContent="Copy invite link",1800)};
